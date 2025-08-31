@@ -1,15 +1,21 @@
 # core
 
-To install dependencies:
+package.json to use core package
 
-```bash
-bun install
+```json
+{
+	"name": "gezcez",
+	"private": true,
+	"workspaces": ["core"]
+}
 ```
 
-To run:
+also dont forget to add
 
-```bash
-bun run index.ts
+```json
+
+"dependencies": {
+   "@gezcez/core":"workspace:core",
+}
 ```
-
-This project was created using `bun init` in bun v1.2.19. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+to consumer's package.json
