@@ -1,4 +1,4 @@
-import { logger } from "../../../backend/src/common/utils";
+import { logger } from "./logger"; 
 import { readFileSync } from "node:fs";
 var imported: any;
 export function buildConfig() {

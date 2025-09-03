@@ -6,17 +6,7 @@ import {
 } from "@nestjs/common"
 import { ApiHeader, ApiParam } from "@nestjs/swagger"
 
-export function UseBearerAuthentication(config: IAuthenticationGuardConfig) {
-	return applyDecorators(
-		UseGuards(AuthenticationGuard(config)),
-		ApiHeader({
-			name: "Authorization",
-			required: true,
-			example: "Bearer ey..."
-		})
-	)
-}
-export interface IAuthenticationGuardConfig {
+export type IAuthenticationGuardConfig = {
 	aud: string
 	issuer: string
 	secret: string
@@ -27,7 +17,7 @@ import type { GezcezJWTPayload, InternalGezcezJWTPayload } from "../types"
 import { GezcezError } from "../GezcezError"
 import { jwtVerify, type JWK, type KeyObject } from "jose"
 
-function AuthenticationGuard(config: IAuthenticationGuardConfig) {
+export function BuildAuthenticationGuard(config: IAuthenticationGuardConfig) {
 	return class AuthorizationGuardInner implements CanActivate {
 		async canActivate(context: ExecutionContext) {
 			const handler = context.getHandler()
