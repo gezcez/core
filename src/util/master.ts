@@ -6,3 +6,4 @@ export async function fetchJSON(input: string | URL | globalThis.Request, init?:
 	return json
 }
 export type TJoinStrings<A extends string, B extends string> = `${A}${B}`
+
