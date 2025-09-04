@@ -20,7 +20,7 @@ type ValueTypeToString<T> =
 	T extends string ? 'text' :
 	T extends boolean ? 'boolean' :
 	T extends Date ? 'timestamp' :
-	never;
+	"unknown";
 export function buildConfigurableMatrix<
 	TABLE_NAME extends string,
 	EXTRA_COLUMNS extends object
