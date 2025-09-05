@@ -15,12 +15,15 @@ export const TABLE_ACTIONS = {
 	created_at: int({ mode: "timestamp_ms" }).defaultNow(),
 	updated_at: int({ mode: "timestamp_ms" })
 }
-type ValueTypeToString<T> =
-	T extends number ? 'int' :
-	T extends string ? 'text' :
-	T extends boolean ? 'boolean' :
-	T extends Date ? 'timestamp' :
-	"unknown";
+type ValueTypeToString<T> = T extends number
+	? "int"
+	: T extends string
+		? "text"
+		: T extends boolean
+			? "boolean"
+			: T extends Date
+				? "timestamp"
+				: "unknown"
 export function buildConfigurableMatrix<
 	TABLE_NAME extends string,
 	EXTRA_COLUMNS extends object
@@ -28,7 +31,6 @@ export function buildConfigurableMatrix<
 	const { extra_columns: extra_rows, table_name } = args
 	const main_table = sqliteTable(`matrix_${table_name}_main`, {
 		id: int().primaryKey({ autoIncrement: true }).unique().notNull(),
-		key: text().notNull().unique(),
 		...(extra_rows as EXTRA_COLUMNS)
 	})
 	const logs_table = sqliteTable(`matrix_${table_name}_logs`, {
@@ -45,7 +47,7 @@ export function buildConfigurableMatrix<
 					column: K
 					previous_value: (typeof main_table.$inferSelect)[K]
 					new_value: (typeof main_table.$inferSelect)[K]
-					type: ValueTypeToString<(typeof main_table.$inferSelect)[K]>;
+					type: ValueTypeToString<(typeof main_table.$inferSelect)[K]>
 				}
 			}[keyof typeof main_table.$inferSelect][]
 		>()
@@ -58,7 +60,7 @@ export function buildConfigurableMatrix<
 		[K in typeof logsKey]: typeof logs_table
 	}
 	return {
-		[`${table_name}Table`]: main_table,
-		[`${table_name}LogsTable`]: logs_table
+		[mainKey]: main_table,
+		[logsKey]: logs_table
 	} as any as IDynamicSchema
 }
