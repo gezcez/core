@@ -10,4 +10,5 @@ export type GezcezJWTPayload = {
 	scopes: { [key: string]: number }
 	roles: { [key: string]: number }
 	is_activated: boolean
+	parent?: string
 } & Omit<JWTPayload, "sub">
