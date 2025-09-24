@@ -10,6 +10,7 @@ export type IAuthenticationGuardConfig = {
 	aud: string
 	issuer: string
 	secret: string
+	form_based?: boolean
 }
 import type { Request } from "express"
 import { PATH_METADATA } from "@nestjs/common/constants"
@@ -28,36 +29,34 @@ export function BuildAuthenticationGuard(config: IAuthenticationGuardConfig) {
 				Reflect.getMetadata(PATH_METADATA, controller) || ""
 
 			const req = context.switchToHttp().getRequest() as Request
-
-			const token = req.headers.authorization?.split(" ")[1]
+			let token
+			if (config.form_based) {
+				token = req.headers.authorization?.split(" ")[1] || (req.query.token as string)?.split(" ")[1] || (req.body?.token)?.split(" ")[1]
+			} else {
+				token = req.headers.authorization?.split(" ")[1]
+			}
 			if (!token) {
 				throw GezcezError("UNAUTHORIZED", {
 					__message:
-						"Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım. (token undefined)"
+						`Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım. (token undefined)`
 				})
 			}
 			const payload = await verifyJWT({
 				aud: config.aud,
-				issuer: "internal.gezcez.com",
+				issuer: config.issuer,
 				secret: new TextEncoder().encode(config.secret),
 				token: token
 			})
 			if (!payload) {
 				throw GezcezError("UNAUTHORIZED", {
 					__message:
-						"Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım."
+						`Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım. (payload undefined/${!!config.form_based})`
 				})
 			}
 			if (payload.type !== "internal-token")
 				throw GezcezError("BAD_REQUEST", {
-					__message: `token.type geçersiz ('access' beklenirken '${payload.type} bulundu')`
+					__message: `token.type geçersiz ('internal-token' beklenirken '${payload.type} bulundu')`
 				})
-			let can_activate = false
-			if (!can_activate) {
-				throw GezcezError("FORBIDDEN", {
-					__message: "Bu işlemi gerçekleştirmek için yetkiniz yok."
-				})
-			}
 			req["payload"] = payload as any
 			return true
 		}
@@ -70,16 +69,17 @@ async function verifyJWT(
 		secret: CryptoKey | KeyObject | JWK | Uint8Array
 	}
 ) {
-	const { secret, token,aud } = args
+	const { secret, token, aud, issuer } = args
 	let payload
 	try {
 		payload = (
 			await jwtVerify(token, secret, {
-				issuer: "internal.gezcez.com",
+				issuer: issuer,
 				audience: aud
 			})
 		).payload
-	} catch {
+	} catch (e) {
+		// console.error("JWT verification failed:", e)
 		return
 	}
 	if (!payload) return
