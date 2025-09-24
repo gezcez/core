@@ -53,7 +53,7 @@ export function BuildAuthenticationGuard(config: IAuthenticationGuardConfig) {
 						`Bu işlemi gerçekleştirmek için giriş yapmış olmanız lazım. (payload undefined/${!!config.form_based})`
 				})
 			}
-			if (payload.type !== "internal-token")
+			if (!["device", "internal-token"].includes(((payload).type) ||"invalid"))
 				throw GezcezError("BAD_REQUEST", {
 					__message: `token.type geçersiz ('internal-token' beklenirken '${payload.type} bulundu')`
 				})

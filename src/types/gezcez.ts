@@ -3,6 +3,7 @@ export type InternalGezcezJWTPayload = {
 	jti: string
 	sub: string
 	aud: string
+	type: "internal-token" | "device"
 } & JWTPayload
 export type GezcezJWTPayload = {
 	jti: string
